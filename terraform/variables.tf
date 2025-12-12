@@ -5,21 +5,21 @@ variable "hostinger_api_token" {
 }
 
 variable "vps_plan" {
-  description = "VPS plan identifier"
+  description = "VPS plan identifier (e.g., hostingercom-vps-kvm2-usd-1m)"
   type        = string
-  default     = "kvm-1"
+  default     = "hostingercom-vps-kvm1-usd-1m"
 }
 
-variable "datacenter" {
-  description = "Datacenter location"
-  type        = string
-  default     = "nl-ams"
+variable "data_center_id" {
+  description = "Data center ID (use hostinger_vps_data_centers data source to find IDs)"
+  type        = number
+  default     = 13  # Check available_data_centers output for correct ID
 }
 
-variable "os_template" {
-  description = "Operating system template"
-  type        = string
-  default     = "ubuntu-24.04-64"
+variable "template_id" {
+  description = "OS template ID (use hostinger_vps_templates data source to find IDs)"
+  type        = number
+  default     = 1002  # Check available_templates output for correct ID
 }
 
 variable "hostname" {
