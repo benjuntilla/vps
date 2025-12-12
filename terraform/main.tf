@@ -28,9 +28,6 @@ resource "cloudflare_record" "vps" {
   ttl     = 300
 }
 
-data "hostinger_vps_data_centers" "all" {}
-data "hostinger_vps_templates" "all" {}
-
 resource "hostinger_vps" "main" {
   plan           = var.vps_plan
   data_center_id = var.data_center_id

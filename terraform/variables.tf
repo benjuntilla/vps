@@ -5,19 +5,18 @@ variable "hostinger_api_token" {
 }
 
 variable "vps_plan" {
-  description = "VPS plan identifier (e.g., hostingercom-vps-kvm2-usd-1m)"
   type        = string
   default     = "hostingercom-vps-kvm1-usd-1m"
 }
 
 variable "data_center_id" {
-  description = "Data center ID - see available_data_centers output. US options: Phoenix, Boston"
+  description = "Think this is phoenix"
   type        = number
   default     = 9
 }
 
 variable "template_id" {
-  description = "OS template ID - see available_templates output for Ubuntu 24.04"
+  description = "Ubuntu 24.04"
   type        = number
   default     = 1077
 }

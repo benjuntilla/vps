@@ -8,12 +8,3 @@ output "vps_hostname" {
   value       = hostinger_vps.main.hostname
 }
 
-output "available_data_centers" {
-  description = "Available data centers with IDs"
-  value       = data.hostinger_vps_data_centers.all.data_centers
-}
-
-output "available_templates" {
-  description = "Available OS templates with IDs"
-  value       = data.hostinger_vps_templates.all.templates
-}
