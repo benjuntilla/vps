@@ -27,14 +27,4 @@ resource "hostinger_vps_ssh_key" "deploy" {
   key  = file(var.ssh_public_key_path)
 }
 
-output "vps_ip" {
-  value = hostinger_vps.main.ipv4_address
-}
 
-output "available_data_centers" {
-  value = data.hostinger_vps_data_centers.all.data_centers
-}
-
-output "available_templates" {
-  value = data.hostinger_vps_templates.all.templates
-}
