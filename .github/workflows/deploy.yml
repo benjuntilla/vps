@@ -4,11 +4,6 @@ on:
   repository_dispatch:
     types: [spacelift-apply]
   workflow_dispatch:
-    inputs:
-      vps_ip:
-        description: 'VPS IP address'
-        required: true
-        type: string
 
 env:
   REPO_URL: ${{ github.server_url }}/${{ github.repository }}
@@ -24,17 +19,12 @@ jobs:
       - name: Set VPS IP
         id: vps
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.vps_ip }}" ]; then
-            echo "ip=${{ inputs.vps_ip }}" >> $GITHUB_OUTPUT
-          else
-            # Resolve IP from DNS (vps.$DOMAIN)
-            VPS_IP=$(dig +short vps.${{ vars.DOMAIN }} A | head -1)
-            if [ -z "$VPS_IP" ]; then
-              echo "Failed to resolve vps.${{ vars.DOMAIN }}"
-              exit 1
-            fi
-            echo "ip=$VPS_IP" >> $GITHUB_OUTPUT
+          VPS_IP=$(dig +short vps.${{ vars.DOMAIN }} A | head -1)
+          if [ -z "$VPS_IP" ]; then
+            echo "Failed to resolve vps.${{ vars.DOMAIN }}"
+            exit 1
           fi
+          echo "ip=$VPS_IP" >> $GITHUB_OUTPUT
 
       - name: Install Ansible
         run: |
