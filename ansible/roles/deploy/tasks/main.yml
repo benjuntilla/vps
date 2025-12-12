@@ -12,11 +12,6 @@
     force: true
     depth: 1
     single_branch: true
-    accept_hostkey: true
-  environment:
-    GIT_TERMINAL_PROMPT: "0"
-  async: 300
-  poll: 10
 
 - name: Create acme.json with correct permissions
   ansible.builtin.file:
