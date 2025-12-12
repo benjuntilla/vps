@@ -26,21 +26,18 @@
     hour: "3"
     job: "cp {{ deploy_path }}/stacks/acme.json {{ deploy_path }}/stacks/acme.json.backup"
 
-- name: Check if .env exists
-  ansible.builtin.stat:
-    path: "{{ deploy_path }}/stacks/.env"
-  register: env_file
-
-- name: Create .env from example if not exists
-  ansible.builtin.copy:
-    src: "{{ deploy_path }}/stacks/.env.example"
-    dest: "{{ deploy_path }}/stacks/.env"
-    remote_src: true
-    mode: "0600"
-  when: not env_file.stat.exists
-
 - name: Deploy Docker Compose stack
   community.docker.docker_compose_v2:
     project_src: "{{ deploy_path }}/stacks"
     state: present
     pull: always
+  environment:
+    ACME_EMAIL: "{{ lookup('env', 'ACME_EMAIL') }}"
+    TRAEFIK_DASHBOARD_HOST: "traefik.{{ domain }}"
+    TRAEFIK_DASHBOARD_AUTH: "{{ lookup('env', 'TRAEFIK_DASHBOARD_AUTH') }}"
+    WHOAMI_HOST: "whoami.{{ domain }}"
+    POSTGRES_USER: app
+    POSTGRES_PASSWORD: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+    POSTGRES_DB: app
+    MYAPP_HOST: "app.{{ domain }}"
+    MYAPP_IMAGE: nginx:alpine

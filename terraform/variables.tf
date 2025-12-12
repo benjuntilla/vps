@@ -21,11 +21,6 @@ variable "template_id" {
   default     = 1077
 }
 
-variable "hostname" {
-  description = "VPS hostname"
-  type        = string
-}
-
 variable "ssh_key_name" {
   description = "Name for the SSH key in Hostinger"
   type        = string
@@ -46,5 +41,10 @@ variable "cloudflare_api_token" {
 
 variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for benjuntilla.com"
+  type        = string
+}
+
+variable "domain" {
+  description = "Base domain for all services"
   type        = string
 }

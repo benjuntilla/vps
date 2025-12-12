@@ -8,6 +8,5 @@ terraform/.terraform.lock.hcl
 ansible/inventory.ini
 
 # Stacks
-stacks/.env
 stacks/acme.json
 stacks/acme.json.backup
