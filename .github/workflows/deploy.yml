@@ -24,10 +24,16 @@ jobs:
       - name: Set VPS IP
         id: vps
         run: |
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "ip=${{ github.event.client_payload.vps_ip }}" >> $GITHUB_OUTPUT
-          else
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.vps_ip }}" ]; then
             echo "ip=${{ inputs.vps_ip }}" >> $GITHUB_OUTPUT
+          else
+            # Resolve IP from DNS (vps.$DOMAIN)
+            VPS_IP=$(dig +short vps.${{ vars.DOMAIN }} A | head -1)
+            if [ -z "$VPS_IP" ]; then
+              echo "Failed to resolve vps.${{ vars.DOMAIN }}"
+              exit 1
+            fi
+            echo "ip=$VPS_IP" >> $GITHUB_OUTPUT
           fi
 
       - name: Install Ansible

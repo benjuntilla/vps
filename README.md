@@ -39,7 +39,7 @@ ssh-keygen -t ed25519 -C "deploy"
    - Header: `Authorization: Bearer <GITHUB_PAT>`
    - Payload:
      ```json
-     {"event_type": "spacelift-apply", "client_payload": {"vps_ip": "{{ .Run.Stack.Outputs.vps_ip }}"}}
+     {"event_type": "spacelift-apply"}
      ```
 
 ### 3. GitHub Actions (Ansible)
