@@ -57,3 +57,7 @@ jobs:
         env:
           REPO_URL: ${{ env.REPO_URL }}
           REPO_BRANCH: ${{ env.REPO_BRANCH }}
+          DOMAIN: ${{ vars.DOMAIN }}
+          ACME_EMAIL: ${{ vars.ACME_EMAIL }}
+          TRAEFIK_DASHBOARD_AUTH: ${{ secrets.TRAEFIK_DASHBOARD_AUTH }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
