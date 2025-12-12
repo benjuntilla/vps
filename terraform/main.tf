@@ -16,11 +16,11 @@ resource "hostinger_vps" "main" {
   datacenter      = var.datacenter
   os_template     = var.os_template
   hostname        = var.hostname
-  ssh_key_ids     = [hostinger_ssh_key.deploy.id]
+  ssh_key_ids     = [hostinger_vps_ssh_key.deploy.id]
   enable_password = false
 }
 
-resource "hostinger_ssh_key" "deploy" {
-  name       = var.ssh_key_name
-  public_key = file(var.ssh_public_key_path)
+resource "hostinger_vps_ssh_key" "deploy" {
+  name = var.ssh_key_name
+  key  = file(var.ssh_public_key_path)
 }
