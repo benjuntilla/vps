@@ -7,8 +7,7 @@ Infrastructure as code for VPS deployment using Terraform, Ansible, and Docker C
 ```
 ├── terraform/           # VPS provisioning (Hostinger + Cloudflare DNS)
 ├── ansible/             # Server configuration
-├── stacks/              # Docker Compose services
-└── .spacelift/policies/ # Spacelift trigger policies
+└── stacks/              # Docker Compose services
 ```
 
 ## Spacelift Setup
@@ -51,13 +50,11 @@ Create a context named `vps` with all shared environment variables:
 
 - **Name**: `vps-ansible`
 - **Project root**: `ansible`
+- **Additional project globs**: `stacks/**/*` (to trigger on stacks changes)
 - **Playbook**: `site.yml`
 - **Runner image**: `public.ecr.aws/spacelift/runner-ansible:latest`
 - **Contexts**: Attach `vps`
 - **Dependency**: `vps-terraform` (provides `TF_VAR_vps_ip`)
-
-**Trigger Policy:**
-Attach `.spacelift/policies/ansible-trigger.rego` to trigger on `ansible/` and `stacks/` changes.
 
 ### 5. Generate Traefik Dashboard Auth
 
