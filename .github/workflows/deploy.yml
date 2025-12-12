@@ -51,6 +51,7 @@ jobs:
 
           [vps:vars]
           ansible_python_interpreter=/usr/bin/python3
+          ansible_ssh_common_args=-o ServerAliveInterval=60 -o ServerAliveCountMax=10
           EOF
 
       - name: Run Ansible playbook

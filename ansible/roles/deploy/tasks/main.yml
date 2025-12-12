@@ -10,6 +10,8 @@
     dest: "{{ deploy_path }}"
     version: "{{ repo_branch }}"
     force: true
+    depth: 1
+    single_branch: true
 
 - name: Create acme.json with correct permissions
   ansible.builtin.file:
