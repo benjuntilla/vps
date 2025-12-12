@@ -11,15 +11,13 @@ variable "vps_plan" {
 }
 
 variable "data_center_id" {
-  description = "Data center ID (use hostinger_vps_data_centers data source to find IDs)"
+  description = "Data center ID - run 'terraform plan' to see available_data_centers output. US options: Phoenix, Boston"
   type        = number
-  default     = 13  # Check available_data_centers output for correct ID
 }
 
 variable "template_id" {
-  description = "OS template ID (use hostinger_vps_templates data source to find IDs)"
+  description = "OS template ID - run 'terraform plan' to see available_templates output. Look for Ubuntu 24.04"
   type        = number
-  default     = 1002  # Check available_templates output for correct ID
 }
 
 variable "hostname" {
