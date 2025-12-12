@@ -31,6 +31,7 @@
     project_src: "{{ deploy_path }}/stacks"
     state: present
     pull: always
+    recreate: always
   environment:
     ACME_EMAIL: "{{ lookup('env', 'ACME_EMAIL') }}"
     TRAEFIK_DASHBOARD_HOST: "traefik.{{ domain }}"
