@@ -4,11 +4,28 @@ terraform {
       source  = "registry.terraform.io/hostinger/hostinger"
       version = "~> 0.1"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
   }
 }
 
 provider "hostinger" {
   api_token = var.hostinger_api_token
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+resource "cloudflare_record" "vps" {
+  zone_id = var.cloudflare_zone_id
+  name    = "vps"
+  content = hostinger_vps.main.ipv4_address
+  type    = "A"
+  proxied = false
+  ttl     = 300
 }
 
 data "hostinger_vps_data_centers" "all" {}
