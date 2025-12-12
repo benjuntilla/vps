@@ -9,6 +9,7 @@
         src: /mnt/workspace/ssh_key
         dest: /tmp/ssh_key
         mode: '0600'
+      check_mode: false
 
 - name: Configure VPS
   hosts: vps
