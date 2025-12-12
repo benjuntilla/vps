@@ -38,8 +38,8 @@
     enabled: true
 
 - name: Install Docker Python SDK
-  ansible.builtin.pip:
-    name: docker
+  ansible.builtin.apt:
+    name: python3-docker
     state: present
 
 - name: Create traefik-public network
