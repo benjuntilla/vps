@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     hostinger = {
-      source  = "hostinger/hostinger"
+      source  = "registry.terraform.io/hostinger/hostinger"
       version = "~> 0.1"
     }
   }
