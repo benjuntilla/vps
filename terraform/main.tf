@@ -28,6 +28,11 @@ resource "cloudflare_record" "vps" {
   ttl     = 300
 }
 
+import {
+  to = hostinger_vps.main
+  id = "1193834"
+}
+
 resource "hostinger_vps" "main" {
   plan           = var.vps_plan
   data_center_id = var.data_center_id
