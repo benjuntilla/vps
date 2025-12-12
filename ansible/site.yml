@@ -8,6 +8,7 @@
         content: "{{ lookup('env', 'SSH_PRIVATE_KEY') }}"
         dest: /tmp/ssh_key
         mode: "0600"
+      check_mode: false
 
 - name: Configure VPS
   hosts: vps
