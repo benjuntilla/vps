@@ -1,4 +1,14 @@
 ---
+- name: Setup SSH key
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Write SSH private key from environment
+      ansible.builtin.copy:
+        content: "{{ lookup('env', 'SSH_PRIVATE_KEY') }}"
+        dest: /tmp/ssh_key
+        mode: "0600"
+
 - name: Configure VPS
   hosts: vps
   become: true
@@ -6,7 +16,7 @@
     repo_url: "{{ lookup('env', 'REPO_URL') | default('https://github.com/YOUR_USER/vps.git', true) }}"
     repo_branch: "{{ lookup('env', 'REPO_BRANCH') | default('main', true) }}"
     deploy_path: /opt/vps
-    domain: "{{ lookup('env', 'DOMAIN') }}"
+    domain: "{{ lookup('env', 'TF_VAR_domain') }}"
 
   roles:
     - docker

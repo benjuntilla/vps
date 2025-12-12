@@ -1,89 +1,95 @@
 # VPS Infrastructure
 
-Infrastructure as code for VPS deployment using Terraform, Ansible, and Docker Compose.
+Infrastructure as code for VPS deployment using Terraform, Ansible, and Docker Compose, orchestrated by Spacelift.
 
 ## Structure
 
 ```
-├── terraform/    # VPS provisioning (Hostinger)
-├── ansible/      # Server configuration
-└── stacks/       # Docker Compose services
+├── terraform/           # VPS provisioning (Hostinger + Cloudflare DNS)
+├── ansible/             # Server configuration
+├── stacks/              # Docker Compose services
+└── .spacelift/policies/ # Spacelift trigger policies
 ```
 
-## Setup
+## Spacelift Setup
 
 ### 1. Prerequisites
 
 ```bash
 # Generate SSH key pair
-ssh-keygen -t ed25519 -C "deploy"
+ssh-keygen -t ed25519 -C "deploy" -f ~/.ssh/vps_deploy
 
-# Get Hostinger API token from: https://hpanel.hostinger.com/profile/api
-
-# Create GitHub PAT with repo scope for Spacelift webhook
+# Get API tokens:
+# - Hostinger: https://hpanel.hostinger.com/profile/api
+# - Cloudflare: https://dash.cloudflare.com/profile/api-tokens (Zone:DNS:Edit)
 ```
 
-### 2. Spacelift (Terraform)
+### 2. Shared Context (vps)
 
-1. Create account at [spacelift.io](https://spacelift.io)
-2. Connect your GitHub repo
-3. Create a stack with project root: `terraform/`
-4. Add environment variables:
-   - `TF_VAR_hostinger_api_token` (secret) - your Hostinger API token
-   - `TF_VAR_cloudflare_api_token` (secret) - your Cloudflare API token
-   - `TF_VAR_cloudflare_zone_id` - your Cloudflare Zone ID
-   - `TF_VAR_domain` - your base domain (e.g., `example.com`)
-   - `TF_VAR_ssh_public_key` (secret) - contents of your ed25519 public key
-5. Add webhook notification for "Apply finished" events:
-   - URL: `https://api.github.com/repos/YOUR_USER/vps/dispatches`
-   - Header: `Authorization: Bearer <GITHUB_PAT>`
-   - Payload:
-     ```json
-     {"event_type": "spacelift-apply"}
-     ```
+Create a context named `vps` with all shared environment variables:
 
-### 3. GitHub Actions (Ansible)
+| Variable | Type | Description |
+|----------|------|-------------|
+| `TF_VAR_hostinger_api_token` | Secret | Hostinger API token |
+| `TF_VAR_cloudflare_api_token` | Secret | Cloudflare API token |
+| `TF_VAR_cloudflare_zone_id` | Plain | Cloudflare Zone ID |
+| `TF_VAR_domain` | Plain | Base domain (e.g., `example.com`) |
+| `TF_VAR_ssh_public_key` | Secret | Contents of `~/.ssh/vps_deploy.pub` |
+| `SSH_PRIVATE_KEY` | Secret | Contents of `~/.ssh/vps_deploy` |
+| `REPO_URL` | Plain | `https://github.com/YOUR_USER/vps.git` |
+| `ACME_EMAIL` | Plain | Let's Encrypt email |
+| `TRAEFIK_DASHBOARD_AUTH` | Secret | htpasswd hash (see below) |
+| `POSTGRES_PASSWORD` | Secret | Database password |
 
-Add repository secrets:
-- `SSH_PRIVATE_KEY` - contents of your ed25519 private key
+### 3. Terraform Stack (vps-terraform)
 
-Add environment variables (used by Ansible):
-- `DOMAIN` - your base domain (e.g., `example.com`)
-- `ACME_EMAIL` - Let's Encrypt email
-- `TRAEFIK_DASHBOARD_AUTH` - htpasswd hash (see below)
-- `POSTGRES_PASSWORD` - database password (secret)
+- **Name**: `vps-terraform`
+- **Project root**: `terraform`
+- **Contexts**: Attach `vps`
 
-Hostnames are derived automatically from `DOMAIN`:
-- `traefik.example.com` - Traefik dashboard
-- `whoami.example.com` - Test service
-- `app.example.com` - Your app
+### 4. Ansible Stack (vps-ansible)
 
-Generate Traefik dashboard password hash:
+- **Name**: `vps-ansible`
+- **Project root**: `ansible`
+- **Playbook**: `site.yml`
+- **Runner image**: `public.ecr.aws/spacelift/runner-ansible:latest`
+- **Contexts**: Attach `vps`
+- **Dependency**: `vps-terraform` (provides `TF_VAR_vps_ip`)
+
+**Trigger Policy:**
+Attach `.spacelift/policies/ansible-trigger.rego` to trigger on `ansible/` and `stacks/` changes.
+
+### 5. Generate Traefik Dashboard Auth
+
 ```bash
 # Generate password hash with $$ escaping for docker-compose
 echo "admin:$(openssl passwd -apr1 yourpassword)" | sed -e 's/\$/\$\$/g'
 ```
 
-The workflow triggers automatically after Spacelift applies.
+## Deployment Flow
 
-### 4. Manual Deployment
+1. **Push to `terraform/`** → Triggers `vps-terraform` stack
+   - Provisions VPS on Hostinger
+   - Creates Cloudflare DNS records
+   - Outputs `vps_ip`
 
-```bash
-# Set required environment variables
-export DOMAIN=example.com
-export ACME_EMAIL=admin@example.com
-export TRAEFIK_DASHBOARD_AUTH='admin:$$apr1$$...'
-export POSTGRES_PASSWORD=secretpassword
+2. **Push to `ansible/` or `stacks/`** → Triggers `vps-ansible` stack
+   - Configures server (Docker, UFW firewall)
+   - Creates Docker networks
+   - Deploys containers from `stacks/docker-compose.yml`
 
-# Run Ansible
-cd ansible
-ansible-playbook -i inventory.ini site.yml
-```
+3. **Terraform output triggers Ansible** via stack dependency
+   - After VPS provisioning, Ansible automatically runs
 
-Or trigger via GitHub Actions:
-```bash
-gh workflow run deploy.yml -f vps_ip=YOUR_VPS_IP
-```
+## Services
+
+All hostnames are derived from `TF_VAR_domain`:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Traefik Dashboard | `traefik.{domain}` | Reverse proxy admin (basic auth protected) |
+| Whoami | `whoami.{domain}` | Test service |
+| App | `app.{domain}` | Your application |
 
 ## Networks
 
@@ -95,4 +101,6 @@ gh workflow run deploy.yml -f vps_ip=YOUR_VPS_IP
 - SSH key authentication only (no passwords)
 - UFW firewall: ports 22, 80, 443 only
 - Traefik dashboard protected with basic auth
-- Secrets passed as environment variables (never stored in repo)
+- Secrets managed via Spacelift (never stored in repo)
+- `acme.json` created with 0600 permissions, backed up daily
+
