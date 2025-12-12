@@ -33,12 +33,19 @@ Create a context named `vps` with all shared environment variables:
 | `TF_VAR_cloudflare_api_token` | Secret | Cloudflare API token |
 | `TF_VAR_cloudflare_zone_id` | Plain | Cloudflare Zone ID |
 | `TF_VAR_domain` | Plain | Base domain (e.g., `example.com`) |
-| `TF_VAR_ssh_public_key` | Secret | Contents of `~/.ssh/vps_deploy.pub` |
-| `SSH_PRIVATE_KEY` | Secret | Contents of `~/.ssh/vps_deploy` |
 | `REPO_URL` | Plain | `https://github.com/YOUR_USER/vps.git` |
 | `ACME_EMAIL` | Plain | Let's Encrypt email |
 | `TRAEFIK_DASHBOARD_AUTH` | Secret | htpasswd hash (see below) |
 | `POSTGRES_PASSWORD` | Secret | Database password |
+
+**Mounted File (for SSH private key):**
+
+| Filename | Description |
+|----------|-------------|
+| `ssh_key` | Contents of `~/.ssh/vps_deploy` (private key) |
+| `ssh_key.pub` | Contents of `~/.ssh/vps_deploy.pub` (public key) |
+
+> **Note**: SSH keys must be added as **mounted files** (not environment variables) to preserve newline formatting. Go to **Context → Mounted Files → Add** and paste the key contents.
 
 ### 3. Terraform Stack (vps-terraform)
 

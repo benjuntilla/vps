@@ -1,15 +1,4 @@
 ---
-- name: Setup SSH key
-  hosts: localhost
-  gather_facts: false
-  tasks:
-    - name: Write SSH private key from environment
-      ansible.builtin.copy:
-        content: "{{ lookup('env', 'SSH_PRIVATE_KEY') }}"
-        dest: /tmp/ssh_key
-        mode: "0600"
-      check_mode: false
-
 - name: Configure VPS
   hosts: vps
   become: true

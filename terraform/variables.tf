@@ -27,12 +27,6 @@ variable "ssh_key_name" {
   default     = "deploy-key"
 }
 
-variable "ssh_public_key" {
-  description = "SSH public key content"
-  type        = string
-  sensitive   = true
-}
-
 variable "cloudflare_api_token" {
   description = "Cloudflare API token with DNS edit permissions"
   type        = string
