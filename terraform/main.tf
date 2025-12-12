@@ -24,7 +24,7 @@ resource "hostinger_vps" "main" {
 
 resource "hostinger_vps_ssh_key" "deploy" {
   name = var.ssh_key_name
-  key  = file(var.ssh_public_key_path)
+  key  = var.ssh_public_key
 }
 
 

@@ -13,13 +13,13 @@ variable "vps_plan" {
 variable "data_center_id" {
   description = "Data center ID - see available_data_centers output. US options: Phoenix, Boston"
   type        = number
-  default     = 13
+  default     = 9
 }
 
 variable "template_id" {
   description = "OS template ID - see available_templates output for Ubuntu 24.04"
   type        = number
-  default     = 1002
+  default     = 1077
 }
 
 variable "hostname" {
@@ -33,8 +33,8 @@ variable "ssh_key_name" {
   default     = "deploy-key"
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to SSH public key file"
+variable "ssh_public_key" {
+  description = "SSH public key content"
   type        = string
-  default     = "~/.ssh/id_ed25519.pub"
+  sensitive   = true
 }
