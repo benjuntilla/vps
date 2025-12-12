@@ -1,0 +1,83 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik-public
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme.json:/acme.json
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD_HOST}`)
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.routers.dashboard.tls.certresolver=letsencrypt
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.middlewares=dashboard-auth
+      - traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}
+
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.whoami.rule=Host(`${WHOAMI_HOST}`)
+      - traefik.http.routers.whoami.entrypoints=websecure
+      - traefik.http.routers.whoami.tls.certresolver=letsencrypt
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  myapp:
+    image: ${MYAPP_IMAGE:-nginx:alpine}
+    container_name: myapp
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    networks:
+      - traefik-public
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.myapp.rule=Host(`${MYAPP_HOST}`)
+      - traefik.http.routers.myapp.entrypoints=websecure
+      - traefik.http.routers.myapp.tls.certresolver=letsencrypt
+      - traefik.docker.network=traefik-public
+
+networks:
+  traefik-public:
+    external: true
+  internal:
+    external: true
+
+volumes:
+  postgres_data:

@@ -1,0 +1,14 @@
+# Terraform
+terraform/*.tfvars
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+# Ansible
+ansible/inventory.ini
+
+# Stacks
+stacks/.env
+stacks/acme.json
+stacks/acme.json.backup

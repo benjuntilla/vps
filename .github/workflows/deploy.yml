@@ -1,0 +1,62 @@
+name: Deploy with Ansible
+
+on:
+  repository_dispatch:
+    types: [spacelift-apply]
+  workflow_dispatch:
+    inputs:
+      vps_ip:
+        description: 'VPS IP address'
+        required: true
+        type: string
+
+env:
+  REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+  REPO_BRANCH: ${{ github.ref_name }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set VPS IP
+        id: vps
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "ip=${{ github.event.client_payload.vps_ip }}" >> $GITHUB_OUTPUT
+          else
+            echo "ip=${{ inputs.vps_ip }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible-galaxy collection install community.docker community.general
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ steps.vps.outputs.ip }} >> ~/.ssh/known_hosts
+
+      - name: Generate inventory
+        run: |
+          cat > ansible/inventory.ini << EOF
+          [vps]
+          ${{ steps.vps.outputs.ip }} ansible_user=root ansible_ssh_private_key_file=~/.ssh/id_ed25519
+
+          [vps:vars]
+          ansible_python_interpreter=/usr/bin/python3
+          EOF
+
+      - name: Run Ansible playbook
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory.ini site.yml
+        env:
+          REPO_URL: ${{ env.REPO_URL }}
+          REPO_BRANCH: ${{ env.REPO_BRANCH }}

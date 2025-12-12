@@ -1,0 +1,44 @@
+---
+- name: Install git
+  ansible.builtin.apt:
+    name: git
+    state: present
+
+- name: Clone repository
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ deploy_path }}"
+    version: "{{ repo_branch }}"
+    force: true
+
+- name: Create acme.json with correct permissions
+  ansible.builtin.file:
+    path: "{{ deploy_path }}/stacks/acme.json"
+    state: touch
+    mode: "0600"
+
+- name: Setup acme.json backup cron
+  ansible.builtin.cron:
+    name: "Backup acme.json"
+    minute: "0"
+    hour: "3"
+    job: "cp {{ deploy_path }}/stacks/acme.json {{ deploy_path }}/stacks/acme.json.backup"
+
+- name: Check if .env exists
+  ansible.builtin.stat:
+    path: "{{ deploy_path }}/stacks/.env"
+  register: env_file
+
+- name: Create .env from example if not exists
+  ansible.builtin.copy:
+    src: "{{ deploy_path }}/stacks/.env.example"
+    dest: "{{ deploy_path }}/stacks/.env"
+    remote_src: true
+    mode: "0600"
+  when: not env_file.stat.exists
+
+- name: Deploy Docker Compose stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}/stacks"
+    state: present
+    pull: always

@@ -1,0 +1,13 @@
+---
+- name: Configure VPS
+  hosts: vps
+  become: true
+  vars:
+    repo_url: "{{ lookup('env', 'REPO_URL') | default('https://github.com/YOUR_USER/vps.git', true) }}"
+    repo_branch: "{{ lookup('env', 'REPO_BRANCH') | default('main', true) }}"
+    deploy_path: /opt/vps
+
+  roles:
+    - docker
+    - firewall
+    - deploy
