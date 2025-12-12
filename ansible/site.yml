@@ -1,4 +1,15 @@
 ---
+- name: Setup SSH key permissions
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Copy SSH key with correct permissions
+      copy:
+        src: /mnt/workspace/ssh_key
+        dest: /tmp/ssh_key
+        mode: '0600'
+
 - name: Configure VPS
   hosts: vps
   become: true
