@@ -11,13 +11,15 @@ variable "vps_plan" {
 }
 
 variable "data_center_id" {
-  description = "Data center ID - run 'terraform plan' to see available_data_centers output. US options: Phoenix, Boston"
+  description = "Data center ID - see available_data_centers output. US options: Phoenix, Boston"
   type        = number
+  default     = 13
 }
 
 variable "template_id" {
-  description = "OS template ID - run 'terraform plan' to see available_templates output. Look for Ubuntu 24.04"
+  description = "OS template ID - see available_templates output for Ubuntu 24.04"
   type        = number
+  default     = 1002
 }
 
 variable "hostname" {
