@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "hostinger" {
-  token = var.hostinger_api_token
+  api_token = var.hostinger_api_token
 }
 
 resource "hostinger_vps" "main" {
