@@ -35,3 +35,6 @@
 - name: Enable UFW
   community.general.ufw:
     state: enabled
+
+- name: Reset SSH connection after firewall changes
+  ansible.builtin.meta: reset_connection
