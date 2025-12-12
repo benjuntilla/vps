@@ -66,9 +66,11 @@ Create a context named `vps` with all shared environment variables:
 ### 5. Generate Traefik Dashboard Auth
 
 ```bash
-# Generate password hash with $$ escaping for docker-compose
-echo "admin:$(openssl passwd -apr1 yourpassword)" | sed -e 's/\$/\$\$/g'
+# Generate password hash (no escaping needed for Spacelift context)
+echo "admin:$(openssl passwd -apr1 yourpassword)"
 ```
+
+Set the output value (e.g., `admin:$apr1$...`) as `TRAEFIK_DASHBOARD_AUTH` in the Spacelift `vps` context. The plaintext password will be used to log in.
 
 ## Deployment Flow
 
